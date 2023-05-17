@@ -1,16 +1,19 @@
 from django.contrib.auth import authenticate, login, logout
-from django.views import View
-from django.shortcuts import render, redirect
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.shortcuts import redirect, render
+from  django.views.generic import TemplateView
 
-class LoginView(View):
+class LoginView(APIView):
     def get(self, request):
-        return render(request, 'login.html')
+        # Render the login form
+        return render(request, 'login')
 
     def post(self, request):
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+        username = request.data.get('username')
+        password = request.data.get('password')
         user = authenticate(request, username=username, password=password)
 
         if user:
@@ -18,22 +21,26 @@ class LoginView(View):
             refresh = RefreshToken.for_user(user)
             token = str(refresh.access_token)
             request.session['token'] = token  # Store the token in the session
-            return redirect('home')
+            return redirect('/home')
         else:
-            return render(request, 'login.html', {'error': 'Invalid credentials'})
+            return render(request, 'index.html', {'error': 'Invalid credentials'})
 
-class LogoutView(View):
+class LogoutView(APIView):
     def get(self, request):
         logout(request)
-        return redirect('login')
+        return redirect('/login')
 
     def post(self, request):
         logout(request)
-        return redirect('login')
+        return redirect('/login')
 
-class HomeView(View):
+class HomeView(APIView):
     def get(self, request):
-        token = request.session.get('token')  # Retrieve the token from the session
+        token = request.session.get('token')
         username = request.user.username
-        return render(request, 'home.html', {'username': username, 'token': token})
+        data = {
+            'username': username,
+            'token': token
+        }
+        return Response(data)
 
