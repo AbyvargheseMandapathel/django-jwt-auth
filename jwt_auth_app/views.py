@@ -9,7 +9,7 @@ from  django.views.generic import TemplateView
 class LoginView(APIView):
     def get(self, request):
         # Render the login form
-        return render(request, 'login')
+        return render(request, 'login', {})  # Add an empty dictionary as context
 
     def post(self, request):
         username = request.data.get('username')
@@ -21,9 +21,15 @@ class LoginView(APIView):
             refresh = RefreshToken.for_user(user)
             token = str(refresh.access_token)
             request.session['token'] = token  # Store the token in the session
+            
+             # Print statements for debugging
+            print(f"User {user.username} successfully logged in")
+            print(f"User is authenticated: {user.is_authenticated}")
+            
+            
             return redirect('/home')
         else:
-            return render(request, 'index.html', {'error': 'Invalid credentials'})
+            return render(request, '/login', {'error': 'Invalid credentials'})
 
 class LogoutView(APIView):
     def get(self, request):
@@ -38,9 +44,16 @@ class HomeView(APIView):
     def get(self, request):
         token = request.session.get('token')
         username = request.user.username
+
+        # Print statements for debugging
+        print(request.headers)
+        print("User:", request.user)  # Print the user object
+        print("Username:", username)  # Print the username
+
         data = {
             'username': username,
             'token': token
         }
         return Response(data)
+
 

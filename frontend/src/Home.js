@@ -9,6 +9,7 @@ const Home = () => {
     // Make API request to fetch user data
     axios.get('/api/auth/home/')  // Replace '/api/auth/home/' with the actual URL of your home page endpoint
       .then(response => {
+        console.log(response.data); // Log the response data to the console
         setUsername(response.data.username);
         setToken(response.data.token);
       })
